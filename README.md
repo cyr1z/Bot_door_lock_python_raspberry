@@ -1,2 +1,2 @@
 # Home bot. 
-First functions - weather parsing for me location and open gate lock
+the first functions are parsing the weather for my location and opening the lock on the gate
