@@ -12,7 +12,7 @@ sticker = {'hi': 'CAACAgIAAxkBAAIkRl4_O--_t6NteIjnwHkE54r3p2fcAAICEwAC2NjhAAGXOT
 
 forecast_icons = {'clear-day': '☀️', 
                   'clear-night': '🌕', 
-                  'rain:': '🌧', 
+                  'rain': '🌧', 
                   'snow': '❄️', 
                   'sleet': '❄️💦', 
                   'wind': '🌬', 
@@ -94,4 +94,4 @@ wind_direction_arrow = {'N': '⬇️',
                         'NNW': '⬇️'
                         }
 
-Words = {}
+words = {}

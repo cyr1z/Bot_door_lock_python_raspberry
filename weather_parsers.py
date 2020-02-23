@@ -63,7 +63,7 @@ class Accuweather(object):
         air_string = f' Качество воздуха: {air_q} ({air_q_value} {air_q_type})'
         for i in part[1:]:
             if i['Value']:
-                air_string += f" {pollen_translate[i['Name']]}: {i['Category']} ({i['Value']})"
+                air_string += f" {pollen_translate[i['Name']]}: {i['Category']} ({i['Value']})\n"
         return air_string
 
     @property
@@ -71,21 +71,21 @@ class Accuweather(object):
         part = self.data['DailyForecasts'][0]['Temperature']
         minimal = part['Minimum']['Value']
         maximal = part['Maximum']['Value']
-        return f"🌡 Температура: {minimal}°C...{maximal}°C"
+        return f"🌡  {minimal}°C...{maximal}°C"
 
     @property
     def real_feel_temperature_shade(self):
         part = self.data['DailyForecasts'][0]['RealFeelTemperatureShade']
         minimal = part['Minimum']['Value']
         maximal = part['Maximum']['Value']
-        return f" в тени ощущается как: {minimal}°C...{maximal}°C"
+        return f"🌡 в тени ощущается как: {minimal}°C...{maximal}°C"
 
     @property
     def real_feel_temperature(self):
         part = self.data['DailyForecasts'][0]['RealFeelTemperature']
         minimal = part['Minimum']['Value']
         maximal = part['Maximum']['Value']
-        return f" ощущается как: {minimal}°C...{maximal}°C"
+        return f"🌡 ощущается как: {minimal}°C...{maximal}°C"
     
     @property
     def hours_of_sun(self):
@@ -147,7 +147,7 @@ class Accuweather(object):
         else:
             wind_gust_direction_arrow_icon = ''
 
-        result = f"{icon_phrase}, {precipitation}"
+        result = f"{icon_phrase}, {precipitation}\n"
         result += f" Ветер {wind_direction_text} {wind_direction_arrow_icon}"
         result += f"({wind_direction_degrees}°) {wind_speed} км/ч\n"
         result += f" порывы ветра {wind_gust_direction_text} {wind_gust_direction_arrow_icon}" 
