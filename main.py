@@ -40,7 +40,8 @@ def main():
             if str(message.chat.id) not in data['rejected_users']:
                 bot.send_sticker(message.chat.id, sticker['what'])
                 bot.send_message(ADMIN,
-                                 f'Добавить пользователя {message.chat.first_name} {message.chat.last_name}?',
+                                 f'Добавить пользователя {message.chat.first_name}'\
+                                 f'{message.chat.last_name}?',
                                  reply_markup=yes_no_kb)
 
     @bot.message_handler(content_types=['text'])
