@@ -3,7 +3,7 @@
 # description:  Home telegram_bot
 # processname: bot
 import logging, telebot, json
-from settings import TOKEN, ADMIN, AWAPIKEY, RP5CITY, LANGRP5, AWCITY, LANGAW
+from settings import TOKEN, ADMIN, AWAPIKEY, RP5CITY, LANGRP5, AWCITY, LANGAW, YRCITY
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from utils import open_door
 from weather_parsers import get_rp5_weather_summary, Accuweather

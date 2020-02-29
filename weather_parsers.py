@@ -1,13 +1,36 @@
 import telebot, feedparser, re, json, urllib.request
 from datetime import datetime
-from settings import AWAPIKEY, LAT, LNG, RP5CITY, LANGRP5, AWCITY, LANGAW
+from yr.libyr import Yr
+from settings import AWAPIKEY, LAT, LNG, RP5CITY, LANGRP5, AWCITY, LANGAW, YRCITY
+from utils import cleanhtml
 from lib import (pollen_translate, 
                  forecast_icons, 
                  severity_icons, 
                  accuweather_sticker, 
                  wind_direction_arrow)
-from utils import cleanhtml
 
+
+class YrNow(object):
+    def __init__(self, city):
+        self.weather = Yr(location_name=city)
+        self.now = self.weather.now()
+        self.symbol = self.now['symbol']['@var']
+        self.precipitation = self.now['precipitation']['@value']
+        self.windDirection = self.now['windDirection']['@code']
+        self.windSpeed = self.now['windSpeed']['@mps']
+        self.temperature = self.now['temperature']['@value']
+        self.pressure = self.now['pressure']['@value']
+        if self.windDirection in wind_direction_arrow.keys():
+            self.wind_direction_arrow_icon = wind_direction_arrow[self.windDirection]
+        else:
+            self.wind_direction_arrow_icon = ''
+
+    def __str__(self):
+        return f"Сейчас 🌡 {self.temperature}°C, Давление {self.pressure}, "\
+               f"Ветер {self.wind_direction_arrow_icon} {self.windSpeed}м/с\n\n"
+
+
+    
 def get_rp5_weather_summary(city, lang):
     rp5_url = "http://rp5.ua/rss/" + city + "/" + lang
     rp5_data = feedparser.parse(rp5_url)
@@ -71,7 +94,7 @@ class Accuweather(object):
         part = self.data['DailyForecasts'][0]['Temperature']
         minimal = part['Minimum']['Value']
         maximal = part['Maximum']['Value']
-        return f"🌡  {minimal}°C...{maximal}°C"
+        return f"\n🌡 {minimal}°C...{maximal}°C"
 
     @property
     def real_feel_temperature_shade(self):
@@ -85,7 +108,7 @@ class Accuweather(object):
         part = self.data['DailyForecasts'][0]['RealFeelTemperature']
         minimal = part['Minimum']['Value']
         maximal = part['Maximum']['Value']
-        return f"🌡 ощущается как: {minimal}°C...{maximal}°C"
+        return f"ощущается {minimal}°C...{maximal}°C"
     
     @property
     def hours_of_sun(self):
@@ -133,7 +156,7 @@ class Accuweather(object):
         cloud_cover = part['CloudCover']
         
         if part['HasPrecipitation']: 
-            precipitation = 'возможны осадки'
+            precipitation = 'осадки'
         else: 
             precipitation = 'без осадков'       
 
@@ -147,30 +170,30 @@ class Accuweather(object):
         else:
             wind_gust_direction_arrow_icon = ''
 
-        result = f"{icon_phrase}, {precipitation}\n"
-        result += f" Ветер {wind_direction_text} {wind_direction_arrow_icon}"
-        result += f"({wind_direction_degrees}°) {wind_speed} км/ч\n"
-        result += f" порывы ветра {wind_gust_direction_text} {wind_gust_direction_arrow_icon}" 
-        result += f" ({wind_gust_direction_degrees}°) до {wind_gust_speed}  км/ч\n"
-        result += f" Облачный покров: {cloud_cover} % \n"
-        result += f" вероятность осадков {precipitation_probability} % \n"
+        result = f"{icon_phrase}, {precipitation}.\n"
+        result += f"Ветер {wind_direction_text} {wind_direction_arrow_icon}"
+        result += f"{wind_speed}км/ч"
+        result += f", порывы {wind_gust_direction_text} {wind_gust_direction_arrow_icon}" 
+        result += f" до {wind_gust_speed}км/ч\n"
+        result += f"Облачный покров: {cloud_cover} % \n"
+        result += f"вероятность осадков {precipitation_probability}%"
 
         if thunderstorm_probability:
-            result += f" вероятность грозы {thunderstorm_probability} % \n"
+            result += f", гроза {thunderstorm_probability}%"
         if rain_probability:
-            result += f" вероятность дождя {rain_probability} % \n"
+            result += f", дождь {rain_probability}% ({hours_of_rain}час.)"
         if snow_probability:
-            result += f" вероятность снега {snow_probability} % \n"
+            result += f", снег {snow_probability}% ({hours_of_snow}час.)"
         if ice_probability:
-            result += f" вероятность льда {ice_probability} % \n"
+            result += f", лед {ice_probability}%"
         if total_liquid:
-            result += f" Всего осадков: {total_liquid} мм \n"
-        if rain:
-            result += f" Дождь: {rain} мм  {hours_of_rain} час. \n"
-        if snow:
-            result += f" Снег: {snow} мм  {hours_of_snow} час. \n"
-        if ice:
-            result += f" Лед: {ice} мм  {hours_of_ice} час. \n"
+            result += f". Всего: {total_liquid}мм \n"
+        # if rain:
+        #     result += f" Дождь: {rain} мм  {hours_of_rain}час. \n"
+        # if snow:
+        #     result += f" Снег: {snow} мм  {hours_of_snow} час. \n"
+        # if ice:
+        #     result += f" Лед: {ice} мм  {hours_of_ice} час. \n"
         return result
 
     @property
@@ -201,7 +224,7 @@ class Accuweather(object):
         cloud_cover = part['CloudCover']
         
         if part['HasPrecipitation']: 
-            precipitation = 'возможны осадки'
+            precipitation = 'осадки'
         else: 
             precipitation = 'без осадков'       
 
@@ -215,39 +238,41 @@ class Accuweather(object):
         else:
             wind_gust_direction_arrow_icon = ''
 
-        result = f"{icon_phrase}, {precipitation}"
-        result += f" Ветер {wind_direction_text} {wind_direction_arrow_icon}"
-        result += f"({wind_direction_degrees}°) {wind_speed} км/ч\n"
-        result += f" порывы ветра {wind_gust_direction_text} {wind_gust_direction_arrow_icon}" 
-        result += f" ({wind_gust_direction_degrees}°) до {wind_gust_speed}  км/ч\n"
-        result += f" Облачный покров: {cloud_cover} % \n"
-        result += f" вероятность осадков {precipitation_probability} % \n"
+        result = f"{icon_phrase}, {precipitation}. "
+        result += f"Ветер {wind_direction_text} {wind_direction_arrow_icon}"
+        result += f"{wind_speed}км/ч"
+        result += f", порывы {wind_gust_direction_text} {wind_gust_direction_arrow_icon}" 
+        result += f" до {wind_gust_speed}км/ч\n"
+        result += f"Облачный покров: {cloud_cover} % \n"
+        result += f"вероятность осадков {precipitation_probability}%"
 
         if thunderstorm_probability:
-            result += f" вероятность грозы {thunderstorm_probability} % \n"
+            result += f", гроза {thunderstorm_probability}%"
         if rain_probability:
-            result += f" вероятность дождя {rain_probability} % \n"
+            result += f", дождь {rain_probability}% ({hours_of_rain}час.)"
         if snow_probability:
-            result += f" вероятность снега {snow_probability} % \n"
+            result += f", снег {snow_probability}% ({hours_of_snow} час.)"
         if ice_probability:
-            result += f" вероятность льда {ice_probability} % \n"
+            result += f", лед {ice_probability}%"
         if total_liquid:
-            result += f" Всего осадков: {total_liquid} мм \n"
-        if rain:
-            result += f" Дождь: {rain} мм  {hours_of_rain} час. \n"
-        if snow:
-            result += f" Снег: {snow} мм  {hours_of_snow} час. \n"
-        if ice:
-            result += f" Лед: {ice} мм  {hours_of_ice} час. \n"
+            result += f". Всего: {total_liquid}мм \n"
+        # if rain:
+        #     result += f" Дождь: {rain} мм  {hours_of_rain}час. \n"
+        # if snow:
+        #     result += f" Снег: {snow} мм  {hours_of_snow} час. \n"
+        # if ice:
+        #     result += f" Лед: {ice} мм  {hours_of_ice} час. \n"
         return result
 
     def __str__(self):
-        return f"{self.headline}\n {self.temperature}\n {self.real_feel_temperature}\n "\
-               f"{self.real_feel_temperature_shade}\n {self.sun}\n День: {self.day}\n "\
-               f"{self.moon}\n Ночь: {self.night}" 
+        return f"{self.headline}\n{self.temperature}, {self.real_feel_temperature}\n\n"\
+               f"День: {self.day}\n"\
+               f"Ночь: {self.night}" 
 
 
 if __name__ == '__main__':
+    now = YrNow(YRCITY)
     forecast = Accuweather(AWCITY, AWAPIKEY, LANGAW)
     print(get_rp5_weather_summary(RP5CITY, LANGRP5))
     print(forecast)
+    print(now)
