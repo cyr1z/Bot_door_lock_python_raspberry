@@ -6,7 +6,7 @@ import logging, telebot, json
 from settings import TOKEN, ADMIN, AWAPIKEY, RP5CITY, LANGRP5, AWCITY, LANGAW, YRCITY
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from utils import open_door
-from weather_parsers import get_rp5_weather_summary, Accuweather
+from weather_parsers import get_rp5_weather_summary, Accuweather, get_own_measure
 from lib import sticker, words
 
 forecast = Accuweather(AWCITY, AWAPIKEY, LANGAW)
@@ -54,6 +54,7 @@ def main():
             elif 'погода' in message.text.lower():
                 forecast.refresh()
                 weather_message: str = get_rp5_weather_summary(RP5CITY, LANGRP5)
+                weather_message += get_own_measure()
                 weather_message += "\n"
                 weather_message += str(forecast)
                 bot.send_message(message.chat.id, weather_message)

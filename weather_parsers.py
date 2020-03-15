@@ -1,7 +1,7 @@
 import telebot, feedparser, re, json, urllib.request
 from datetime import datetime
 from yr.libyr import Yr
-from settings import AWAPIKEY, LAT, LNG, RP5CITY, LANGRP5, AWCITY, LANGAW, YRCITY
+from settings import AWAPIKEY, LAT, LNG, RP5CITY, LANGRP5, AWCITY, LANGAW, YRCITY, TERMOMETER_IP
 from utils import cleanhtml
 from lib import (pollen_translate, 
                  forecast_icons, 
@@ -26,9 +26,8 @@ class YrNow(object):
             self.wind_direction_arrow_icon = ''
 
     def __str__(self):
-        return f"Сейчас 🌡 {self.temperature}°C, Давление {self.pressure}, "\
-               f"Ветер {self.wind_direction_arrow_icon} {self.windSpeed}м/с\n\n"
-
+        return f"Сейчас 🌡 {self.temperature}°C, Давление {self.pressure}, ☂️ {self.precipitation}мм, "\
+               f"🌬 {self.wind_direction_arrow_icon} {self.windSpeed}м/с\n\n"
 
     
 def get_rp5_weather_summary(city, lang):
@@ -36,6 +35,17 @@ def get_rp5_weather_summary(city, lang):
     rp5_data = feedparser.parse(rp5_url)
     last_rp5 = rp5_data.entries[0]
     return f"{last_rp5['title'][:8]} {cleanhtml(last_rp5['summary'])}\n"
+
+
+def get_own_measure():
+    url = f"http://{TERMOMETER_IP}/"
+    try:
+        with urllib.request.urlopen(url) as aw_url:
+            data = json.loads(aw_url.read().decode())
+            return f"\nСобственные измерения: {data['temperature']}°C, Влажность {data['humidity']}%, "\
+                f"Давление {data['pressure']} мм рс"
+    except:
+        return ''
 
 
 class Accuweather(object):
@@ -276,3 +286,4 @@ if __name__ == '__main__':
     print(get_rp5_weather_summary(RP5CITY, LANGRP5))
     print(forecast)
     print(now)
+    print(get_own_measure())
