@@ -5,17 +5,17 @@
 import logging, telebot, json
 from settings import TOKEN, ADMIN, AWAPIKEY, RP5CITY, LANGRP5, AWCITY, LANGAW, YRCITY
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
-from utils import open_door
-from weather_parsers import get_rp5_weather_summary, Accuweather, get_own_measure
+from utils import open_door, pin_clean, open_dog_door, old_message
+from weather_parsers import get_rp5_weather_summary, get_own_measure, YrNow #, Accuweather
 from lib import sticker, words
 
-forecast = Accuweather(AWCITY, AWAPIKEY, LANGAW)
+#forecast = Accuweather(AWCITY, AWAPIKEY, LANGAW)
 logging.basicConfig(filename="/home/pi/App/BotDoorLock/bot.log", level=logging.DEBUG)
 
 bot = telebot.TeleBot(TOKEN)
-keyboard1 = telebot.types.ReplyKeyboardMarkup()
+keyboard1 = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 keyboard1.row(' 🔑 Открывай', '🌈 Погода')
-
+keyboard1.add('🐕 Выпустить собаку', '👁 Кто там')
 try:
     with open("/home/pi/App/BotDoorLock/data.json", "r") as read_file:
         data = json.load(read_file)
@@ -25,6 +25,7 @@ except FileNotFoundError:
 
 
 def main():
+    
     @bot.message_handler(commands=['start'])
     def start_message(message):
         logging.debug(f'start from {message.chat.first_name} {message.chat.last_name}')
@@ -46,17 +47,28 @@ def main():
 
     @bot.message_handler(content_types=['text'])
     def send_text(message):
-        if str(message.chat.id) in data['users']:
+        if str(message.chat.id) in data['users'] and not old_message(message.date):
             if 'открывай' in message.text.lower():
                 open_door()
                 bot.send_sticker(message.chat.id, sticker['hi'])
+                pin_clean()
+
+            elif 'выпустить' in message.text.lower():
+                open_dog_door()
+                bot.send_sticker(message.chat.id, sticker['dog'])
+                pin_clean()
+
+            elif 'кто' in message.text.lower():
+                bot.send_message(message.chat.id, 'пока не вижу')
 
             elif 'погода' in message.text.lower():
-                forecast.refresh()
+                yr_now = YrNow(YRCITY)
+                #forecast.refresh()
                 weather_message: str = get_rp5_weather_summary(RP5CITY, LANGRP5)
                 weather_message += get_own_measure()
                 weather_message += "\n"
-                weather_message += str(forecast)
+                weather_message += str(yr_now)
+                #weather_message += str(forecast)
                 bot.send_message(message.chat.id, weather_message)
 
             else:
@@ -90,12 +102,15 @@ def main():
                 logging.exception("Exception occurred")
                 bot.send_message(ADMIN, str(e))
 
+    pin_clean()
     bot.polling()
 
 
 if __name__ == '__main__':
     try:
         main()
+        pin_clean()
     except Exception as e:
         logging.exception("Exception occurred")
         logging.error(e)
+        pin_clean()

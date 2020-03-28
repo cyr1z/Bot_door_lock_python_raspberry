@@ -8,7 +8,8 @@ pollen_translate = {
 
 sticker = {'hi': 'CAACAgIAAxkBAAIkRl4_O--_t6NteIjnwHkE54r3p2fcAAICEwAC2NjhAAGXOThJuBIDcRgE',
            'what': 'CAACAgIAAxkBAAIkSF4_PLKZCqDLg5MQ0NtIAAGB0wdpIgACGBMAAtjY4QAB-3Tzhzbq_IkYBA',
-           'start': 'CAACAgIAAxkBAAIkSl4_PPLgCND-sRRtsvTjXc51bG_qAAIIEwAC2NjhAAFQoxJ3RFyVpxgE'}
+           'start': 'CAACAgIAAxkBAAIkSl4_PPLgCND-sRRtsvTjXc51bG_qAAIIEwAC2NjhAAFQoxJ3RFyVpxgE',
+           'dog': 'CAACAgIAAxkBAAIz9F5yGoTQi0pRfg_gJGb69CWdPJNQAAK6AQAC0lqIAaausk_orIbkGAQ'}
 
 forecast_icons = {'clear-day': '☀️', 
                   'clear-night': '🌕', 
