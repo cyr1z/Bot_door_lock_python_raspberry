@@ -1,6 +1,6 @@
-#!/bin/bash
+ #!/bin/bash
 
-for (( ; ; ))
+while :
 do
-/home/pi/App/BotDoorLock/main.py 
+/home/pi/App/BotDoorLock/main.py >> /home/pi/App/BotDoorLock/output.txt
 done

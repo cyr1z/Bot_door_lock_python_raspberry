@@ -2,7 +2,7 @@
 # chkconfig: - 98 02                        
 # description:  Home telegram_bot
 # processname: bot
-import logging, telebot, json
+import telebot, json #, logging
 from settings import TOKEN, ADMIN, AWAPIKEY, RP5CITY, LANGRP5, AWCITY, LANGAW, YRCITY
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from utils import open_door, pin_clean, open_dog_door, old_message
@@ -10,7 +10,7 @@ from weather_parsers import get_rp5_weather_summary, get_own_measure, YrNow #, A
 from lib import sticker, words
 
 #forecast = Accuweather(AWCITY, AWAPIKEY, LANGAW)
-logging.basicConfig(filename="/home/pi/App/BotDoorLock/bot.log", level=logging.DEBUG)
+#logging.basicConfig(filename="/home/pi/App/BotDoorLock/bot.log", level=logging.DEBUG)
 
 bot = telebot.TeleBot(TOKEN)
 keyboard1 = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
@@ -21,14 +21,14 @@ try:
         data = json.load(read_file)
 except FileNotFoundError:
     data = {'users': [], 'rejected_users': []}
-    logging.error('no open data.json')
+    #logging.error('no open data.json')
 
 
 def main():
     
     @bot.message_handler(commands=['start'])
     def start_message(message):
-        logging.debug(f'start from {message.chat.first_name} {message.chat.last_name}')
+        #logging.debug(f'start from {message.chat.first_name} {message.chat.last_name}')
         yes_no_kb = InlineKeyboardMarkup(row_width=2)
         yn_buttons = [InlineKeyboardButton(text='✅ Да', callback_data=message.chat.id),
                       InlineKeyboardButton(text='❌ Нет', callback_data=11)]
@@ -88,7 +88,7 @@ def main():
                     bot.send_message(ADMIN, 'Добавил')
                     bot.send_sticker(call.data, sticker['start'], reply_markup=keyboard1)
             except Exception as e:
-                logging.exception("Exception occurred")
+                #logging.exception("Exception occurred")
                 bot.send_message(ADMIN, str(e))
 
         else:
@@ -99,7 +99,7 @@ def main():
                     bot.send_message(ADMIN, 'Отбой')
 
             except Exception as e:
-                logging.exception("Exception occurred")
+                #logging.exception("Exception occurred")
                 bot.send_message(ADMIN, str(e))
 
     pin_clean()
@@ -111,6 +111,6 @@ if __name__ == '__main__':
         main()
         pin_clean()
     except Exception as e:
-        logging.exception("Exception occurred")
-        logging.error(e)
+        #logging.exception("Exception occurred")
+        #logging.error(e)
         pin_clean()
