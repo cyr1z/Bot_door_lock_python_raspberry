@@ -1,13 +1,6 @@
 import re
-import RPi.GPIO as GPIO
-from time import sleep, time
-
-Relay_Ch2 = 20
-Relay_Ch3 = 21
-# GPIO.setwarnings(False)
-# GPIO.setmode(GPIO.BCM)
-# GPIO.setup(Relay_Ch2, GPIO.OUT)
-# GPIO.setup(Relay_Ch3, GPIO.OUT)
+import requests
+from time import time
 
 
 def cleanhtml(raw_html):
@@ -16,23 +9,12 @@ def cleanhtml(raw_html):
     return cleantext
 
 def open_door():
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(Relay_Ch2, GPIO.OUT)
-    GPIO.output(Relay_Ch2, GPIO.LOW)
-    sleep(0.5)
-    GPIO.output(Relay_Ch2, GPIO.HIGH)
+    response = requests.get('http://192.168.88.167:8081/door').json()
+    return response
 
 def open_dog_door():
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(Relay_Ch3, GPIO.OUT)
-    GPIO.output(Relay_Ch3, GPIO.LOW)
-    sleep(0.5)
-    GPIO.output(Relay_Ch3, GPIO.HIGH)
-
-def pin_clean():
-    GPIO.cleanup()
+    response = requests.get('http://192.168.88.167:8081/dog_door').json()
+    return response
 
 def old_message(message_data):
     if int(time()) - int(message_data) > 120:
